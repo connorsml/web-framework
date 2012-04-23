@@ -5,7 +5,7 @@ defmodule Feb do
   #
   # expands to.
   defmacro __using__(module, opts) do
-    root_val = case Keyword.get(opts, :root, ".")
+    root_val = Keyword.get(opts, :root, ".")
 
     quote do
       import Feb, only: [get: 2, post: 2]
