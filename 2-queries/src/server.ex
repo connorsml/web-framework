@@ -10,10 +10,14 @@ defmodule HelloServer do
     end
   end
 
+  get "/idontcare" do
+    :ok
+  end
+
   get "/demo", file: "demo.html"
 
   post "/" do
-    { :ok, "You're posted!\nYour data: #{inspect _data}" }
+    { :ok, "You're posted!\nYour data: #{inspect _body}" }
   end
 
   ###
