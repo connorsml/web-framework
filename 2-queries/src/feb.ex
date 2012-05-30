@@ -4,7 +4,9 @@ defmodule Feb do
   #    use Feb, root: "assets"
   #
   # expands to.
-  defmacro __using__(module, opts) do
+  defmacro __using__(opts) do
+    module = __CALLER__.module
+
     Module.add_compile_callback module, __MODULE__, :default_handle
 
     root_val = Keyword.get(opts, :root, ".")
@@ -73,14 +75,14 @@ defmodule Feb do
     # Iterate over each block in `blocks` and produce a separate `handle`
     # clause for it
     Enum.map blocks, (fn do
-      {:get, code} ->
+      {[:get], code} ->
         quote hygiene: false do
           def handle(:get, unquote(path), _query) do
             unquote(code)
           end
         end
 
-      {:post, code} ->
+      {[:post], code} ->
         quote hygiene: false do
           def handle(:post, unquote(path), _data) do
             unquote(code)
@@ -116,7 +118,7 @@ defmodule Feb do
 
           # Otherwise, the request is assumed to be valid but the requested
           # resource cannot be found
-          _ ->
+          true ->
             format_error(404)
         end
       end
