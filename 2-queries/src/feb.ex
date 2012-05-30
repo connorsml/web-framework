@@ -40,10 +40,10 @@ defmodule Feb do
       def handle(:get, unquote(path), _query) do
         full_path = File.join([static_root(), unquote(bin)])
         case File.read(full_path) do
-        match: { :ok, data }
-          { :ok, data }
-        else:
-          format_error(404)
+          { :ok, data } ->
+            { :ok, data }
+          _ ->
+            format_error(404)
         end
       end
     end
@@ -69,27 +69,24 @@ defmodule Feb do
   end
 
   # Generic request handler
-  defmacro multi_handle(path, blocks) do
-    # Remove the entry for `:do` which is nil in this case
-    blocks = Keyword.delete blocks, :do
-
+  defmacro multi_handle(path, [do: { :"->", _line, blocks }]) do
     # Iterate over each block in `blocks` and produce a separate `handle`
     # clause for it
-    Enum.map blocks, fn ->
-    match: {:get, code}
-      quote hygiene: false do
-        def handle(:get, unquote(path), _query) do
-          unquote(code)
+    Enum.map blocks, (fn do
+      {:get, code} ->
+        quote hygiene: false do
+          def handle(:get, unquote(path), _query) do
+            unquote(code)
+          end
         end
-      end
 
-    match: {:post, code}
-      quote hygiene: false do
-        def handle(:post, unquote(path), _data) do
-          unquote(code)
+      {:post, code} ->
+        quote hygiene: false do
+          def handle(:post, unquote(path), _data) do
+            unquote(code)
+          end
         end
-      end
-    end
+    end)
   end
 
   ###
@@ -108,18 +105,19 @@ defmodule Feb do
     quote do
       def handle(method, path, data // "")
       def handle(method, path, data) do
-        # Allow only the listed methods
-        if not (method in [:get, :post]) do
-          format_error(400)
+        cond do
+          # Allow only the listed methods
+          not (method in [:get, :post]) ->
+            format_error(400)
 
-        # Path should always start with a slash (/)
-        elsif: not match?("/" <> _, path)
-          format_error(400)
+          # Path should always start with a slash (/)
+          not match?("/" <> _, path) ->
+            format_error(400)
 
-        # Otherwise, the request is assumed to be valid but the requested
-        # resource cannot be found
-        else:
-          format_error(404)
+          # Otherwise, the request is assumed to be valid but the requested
+          # resource cannot be found
+          _ ->
+            format_error(404)
         end
       end
     end
@@ -130,12 +128,12 @@ defmodule Feb do
   # Return a { :error, <binary> } tuple with error description
   def format_error(code) do
     { :error, case code do
-    match: 400
-      "400 Bad Request"
-    match: 404
-      "404 Not Found"
-    else:
-      "503 Internal Server Error"
+      400 ->
+        "400 Bad Request"
+      404 ->
+        "404 Not Found"
+      _ ->
+        "503 Internal Server Error"
     end }
   end
 end
