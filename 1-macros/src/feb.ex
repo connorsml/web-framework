@@ -4,14 +4,14 @@ defmodule Feb do
   #    use Feb, root: "assets"
   #
   # expands to.
-  defmacro __using__(module, opts) do
+  defmacro __using__(opts) do
     root_val = Keyword.get(opts, :root, ".")
 
     quote do
       import Feb, only: [get: 2, post: 2]
 
       def start do
-        Feb.start unquote(module)
+        Feb.start unquote(__CALLER__.module)
       end
 
       defp static_root, do: unquote(root_val)
