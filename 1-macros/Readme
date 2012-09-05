@@ -1,0 +1,11 @@
+This code accompanies the blog post ->
+http://elixir-lang.org/blog/2012/04/21/hello-macros/
+
+Sample usage:
+
+$ make
+$ iex
+import HelloServer
+handle :get, "/", nil
+handle :post, "/", :data
+handle :get, "/demo", nil
