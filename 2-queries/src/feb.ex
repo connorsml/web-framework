@@ -7,7 +7,7 @@ defmodule Feb do
   defmacro __using__(opts) do
     module = __CALLER__.module
 
-    Module.add_compile_callback module, __MODULE__, :default_handle
+    Module.add_attribute module, :after_compile, { __MODULE__, :default_handle }
 
     root_val = Keyword.get(opts, :root, ".")
 
@@ -74,7 +74,7 @@ defmodule Feb do
   defmacro multi_handle(path, [do: { :"->", _line, blocks }]) do
     # Iterate over each block in `blocks` and produce a separate `handle`
     # clause for it
-    Enum.map blocks, (fn do
+    Enum.map blocks, (function do
       {[:get], code} ->
         quote hygiene: false do
           def handle(:get, unquote(path), _query) do
@@ -103,7 +103,7 @@ defmodule Feb do
 
   # Default catch-all handler for request not handled explicitly by the client
   # code
-  defmacro default_handle(_) do
+  defmacro default_handle(_, _) do
     quote do
       def handle(method, path, data // "")
       def handle(method, path, data) do

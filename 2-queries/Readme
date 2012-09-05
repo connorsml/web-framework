@@ -1,0 +1,13 @@
+This code accompanies the blog post ->
+http://elixir-lang.org/blog/2012/05/06/web-framework-2/
+
+Sample usage:
+
+$ make
+$ iex
+{ path, query } = Feb.split_path "/search?q=donut"
+import HelloServer
+handle :get, path, query
+handle :get, "/search", Orddict.new
+# Let's also test our generic handler with a query
+handle :get, "/kvstore", URI.decode_query("key=value")
